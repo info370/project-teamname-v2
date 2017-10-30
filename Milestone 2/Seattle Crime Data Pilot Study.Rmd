@@ -1,0 +1,44 @@
+---
+title: "Seattle Crime Data Pilot Study"
+output: html_notebook
+---
+
+
+
+##The Data
+We used data available from the seattle police department on 911 calls across all areas of seattle. The complete data set is several hundred MBs large, so we're using just one month's worth (October of 2017) here. link: https://data.seattle.gov/Public-Safety/Seattle-Police-Department-911-Incident-Response/3k2p-39jp
+```{r}
+library('dplyr')
+library('ggplot2')
+path.to.csv <- 'D:/Downloads/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
+spd.911 <- read.csv(path.to.csv, TRUE)
+ View(spd.911)
+
+```
+
+##Exploring the accuracy of crime reporting by citizens
+One of our uncertainties in using 911 call data is that how an individual describes a crime might not be consistent with what law enforcement finds when they get there. This could be a problem because if there are a significant amount of cases where this happens, it means the data will start off dirtier than we might like. 
+
+```{r}
+spd.911.count <- nrow(spd.911)
+
+# This should be only rows where the Initial Type Group as reported in the call is not the same as the one confirmed at the scene (Clearance Group)
+spd.filtered <- filter(spd.911, as.vector(Event.Clearance.Group) != as.vector(Initial.Type.Group))
+#View(spd.filtered)
+spd.filtered.count <- nrow(spd.filtered)
+
+# let's find the percentage of rows that are inconsistent between Initial Type Group and Clearance Group
+percent.inconsistent <- spd.filtered.count / spd.911.count
+percent.inconsistent
+```
+At first glance, that number seems pretty bad. It would indicate that more than half of 911 callers are incorrectly identifying the crime in progress, or for whatever reason the classification needs to change. However, after scrutinizing this result, we determined that there are actually quite a few cases where the Groups and Subgroups get swapped between the Initial code and the Clearance code, yet they keep the same values. To see if this makes a difference, let's assume the codes have been swapped between the Initial Group and the Event Clearance group
+```{r}
+
+# Now compare the Initial SUBgroup to the Event Clearance Group to see if there are any cases where they may have been swapped.
+spd.911.swapped <- filter(spd.911, as.vector(Event.Clearance.Group) != as.vector(Initial.Type.Subgroup))
+
+percent.swapped <- nrow(spd.911.swapped) / spd.911.count
+percent.swapped
+
+```
+After attempting the calculation again after swapping, you can see that the percentage is essentially cut in half. Almost 1/3 of calls being reported incorrectly by the caller is still significant, but much better.  
