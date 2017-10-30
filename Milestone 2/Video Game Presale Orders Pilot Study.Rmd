@@ -1,0 +1,58 @@
+---
+title: "Video Game Presale Orders Pilot Study"
+output: html_notebook
+---
+
+##This R Notebook explores the relationship between presale orders for certain video games ordered in late 2016 and their ratings, which could show the quality of the game. The presale orders are pulled from www.vgchartz.com while the ratings are pulled from www.metacritic.com.
+
+```{r setup}
+if (!require(rvest)) { install.packages('rvest'); require(rvest) } # see https://github.com/hadley/rvest
+
+library(stringr) # for doing string manipulations
+library(dplyr) # for data framing
+```
+
+Pulling the data from www.metacritic.com.
+```{r}
+url_link <- "http://www.metacritic.com/game"
+meta_critic <- read_html(url_link)
+```
+
+Now, let's take a look at the different entries on the page.
+```{r}
+vgame_results <- meta_critic %>% html_nodes("li.product.has_small_image") %>% html_nodes("div.wrap.product_wrap") %>% html_nodes("div.product_basics.stats") %>% html_nodes("div.basic_stats.has_score") %>% html_nodes("div.main_stats")
+
+vgame_results
+```
+
+We want to create functions to pull the name, rating, and release date of each game listed.
+
+```{r}
+
+extract_name <- function(result) {
+  name <- result %>% html_nodes("h3.product_title") %>% html_nodes("a") %>% html_text(trim=TRUE)
+}
+
+extract_score <- function(result) {
+  score <- result %>% html_nodes("span") %>% html_text(trim=TRUE)
+}
+
+```
+
+We now will use the functions created above to extract data from the website and create a dataframe with the compiled data.
+
+```{r}
+records <- vector("list", length = length(vgame_results))
+
+for (i in seq(1:length(vgame_results))) {
+  result <- vgame_results[i]
+  
+  name <- extract_name(result)
+  score <- extract_score(result)
+  records[[i]] <- data_frame(name = name, score = score)
+}
+
+df_vgame <- bind_rows(records)
+View(df_vgame)
+```
+
