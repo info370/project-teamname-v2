@@ -1,0 +1,79 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r setup}
+if (!require(rvest)) { install.packages('rvest'); require(rvest) } # see https://github.com/hadley/rvest
+
+library(stringr) # for doing string manipulations
+library(dplyr)
+```
+
+Read in HTML from VGChartz
+
+```{r}
+url <- "http://www.vgchartz.com/preorders/42995/USA/"
+
+vg <- read_html(url)
+```
+
+collect data
+```{r}
+entries <- vg %>% html_nodes("#chart_body") %>% html_nodes("table.chart") %>% html_nodes("tr")
+first_result <- entries[2]
+```
+Functions for snagging the juicy deets.
+-Game name
+-Weeks to launch
+-Total
+
+Starting with Game
+```{r}
+getGameName <- function(result) {
+  links <- xml_contents(result)[3] %>%  html_nodes("td") %>% html_nodes("a")
+  name <- links[2] %>% html_text(trim=TRUE)
+  name
+}
+
+getGameName(first_result)
+```
+Now scrape them weeks til launch
+```{r}
+getWeeks <- function(test) {
+  week <- xml_contents(test)[5] %>% html_text
+  week
+}
+getWeeks(first_result)
+```
+Cool last but not least, lets grab the total number of preorders.
+```{r}
+getTotals <- function(result) {
+  result
+  totals <- xml_contents(result)[9] %>% html_text
+  totals
+}
+getTotals(first_result)
+```
+BOOM! lets slap some data in a frame!
+```{r}
+records <- vector("list", length = length(entries))
+
+for (i in seq(2:length(entries))) {
+  result <- entries[i]
+  name <- getGameName(result)
+  #week <- getWeeks(result)
+  total <- getTotals(result)
+  records[[i]] <- data_frame(Name = name)
+}
+
+df_games <- bind_rows(records)
+#View(df_games)
+```
+
+
+
