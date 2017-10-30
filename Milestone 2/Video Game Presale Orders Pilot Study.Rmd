@@ -25,7 +25,7 @@ vgame_results <- meta_critic %>% html_nodes("li.product.has_small_image") %>% ht
 vgame_results
 ```
 
-We want to create functions to pull the name, rating, and release date of each game listed.
+We want to create functions to pull the name and rating of each game listed.
 
 ```{r}
 
