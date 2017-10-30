@@ -62,14 +62,19 @@ getTotals(first_result)
 BOOM! lets slap some data in a frame!
 ```{r}
 records <- vector("list", length = length(entries))
-
+name <- c()
+week <- c()
+total <- c()
 for (i in seq(2:length(entries))) {
+  if(i%%2 == 0) {
   result <- entries[i]
-  name <- getGameName(result)
-  #week <- getWeeks(result)
-  total <- getTotals(result)
+  name <- c(name, getGameName(result))
+  week <- c(week, getWeeks(result))
+  total <- c(total, getTotals(result))
   records[[i]] <- data_frame(Name = name)
+  }
 }
+records <- data.frame(name, week, total, stringsAsFactors = FALSE)
 
 df_games <- bind_rows(records)
 #View(df_games)
