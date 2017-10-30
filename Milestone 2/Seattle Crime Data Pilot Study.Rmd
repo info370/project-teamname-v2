@@ -10,7 +10,7 @@ We used data available from the seattle police department on 911 calls across al
 ```{r}
 library('dplyr')
 library('ggplot2')
-path.to.csv <- 'D:/Downloads/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
+path.to.csv <- 'Seattle_Police_Department_911_Incident_Response_Oct17.csv'
 spd.911 <- read.csv(path.to.csv, TRUE)
  View(spd.911)
 
