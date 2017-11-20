@@ -1,0 +1,44 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup}
+# install.packages("tidyverse");
+
+library(tidyverse)
+require("maps")
+library(geosphere)
+path.to.csv <- 'D:/Documents/INFO 370/project-teamname-v2/Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
+spd.911 <- read.csv(path.to.csv, TRUE)
+ View(spd.911)
+
+```
+
+```{r}
+
+# usa <- map_data("state")
+# data <- merge(usa, spd.911)
+here_long <-  -122.307050
+here_lat <- 47.663851099999995
+          
+#distVincentyEllipsoid(c(here_long, here_lat), c(-122.3174, 47.663972))
+                      
+nrow(spd.911)
+
+spd.911 <- spd.911 %>% 
+             rowwise() %>% 
+             mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(here_long, here_lat)))
+                  
+data.here <- spd.911 %>% filter(dist < 1000)
+nrow(data.here)
+
+ggplot(data.here, aes(x = Longitude, y = Latitude)) +
+  geom_point(colour = "black", alpha = 0.25) +
+  coord_map()
+
+# usamap <- ggplot(data, aes(long, lat, group = group)) +
+  # geom_polygon(fill = "white", colour = "black") +
+  # geom_point(colour = "black", alpha = 0.25)
+
+```
