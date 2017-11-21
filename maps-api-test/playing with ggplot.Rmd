@@ -9,8 +9,11 @@ output: html_notebook
 library(tidyverse)
 require("maps")
 library(geosphere)
-path.to.csv <- 'D:/Documents/INFO 370/project-teamname-v2/Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
+path.to.csv <- '~/documents/INFO370/project-teamname-v2/Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
 spd.911 <- read.csv(path.to.csv, TRUE)
+
+spd.911$clearance_date_ts = as.POSIXct(strptime(spd.911$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))
+spd.911$clearance_date_date = as.Date(spd.911$clearance_date_ts)
  View(spd.911)
 
 ```
@@ -30,15 +33,25 @@ spd.911 <- spd.911 %>%
              rowwise() %>% 
              mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(here_long, here_lat)))
                   
-data.here <- spd.911 %>% filter(dist < 1000)
+data.here <- spd.911 %>% filter(dist < 4600)
 nrow(data.here)
+data.now <- data.here %>% filter(clearance_date_ts < '2017-10-02 00:00:00')
+nrow(data.now)
+# View(data.now)
 
-ggplot(data.here, aes(x = Longitude, y = Latitude)) +
+ggplot(data.now, aes(x = Longitude, y = Latitude)) +
   geom_point(colour = "black", alpha = 0.25) +
   coord_map()
 
-# usamap <- ggplot(data, aes(long, lat, group = group)) +
-  # geom_polygon(fill = "white", colour = "black") +
-  # geom_point(colour = "black", alpha = 0.25)
+```
 
+```{r}
+freq_by_subgroup <- table(data.now$Event.Clearance.Group)
+# View(freq_by_subgroup)
+
+ggplot(as.data.frame(freq_by_subgroup), 
+       aes(x = Var1, y = Freq)) +
+       geom_bar(stat = 'identity') +# create bar plot
+    coord_flip()
+        
 ```
