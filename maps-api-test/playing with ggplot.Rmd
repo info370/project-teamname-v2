@@ -5,16 +5,24 @@ output: html_notebook
 
 ```{r setup}
 # install.packages("tidyverse");
-
+# install.packages("rgdal");
 library(tidyverse)
 require("maps")
 library(geosphere)
+library(stringr)
+library(rgdal)
+if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
 path.to.csv <- '~/documents/INFO370/project-teamname-v2/Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
 spd.911 <- read.csv(path.to.csv, TRUE)
 
 spd.911$clearance_date_ts = as.POSIXct(strptime(spd.911$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))
 spd.911$clearance_date_date = as.Date(spd.911$clearance_date_ts)
- View(spd.911)
+# View(spd.911)
+
+# path to the FOLDER with the .shp file in it. the second param is the name of the .shp file
+# seattle <- readOGR(dsn = path.expand("~/documents/INFO370/project-teamname-v2/maps-api-test"), layer = "Seattle_City_Limits")
+
+seattle = get_map(location = c(lon = -122.31, lat = 47.61), zoom = 12, maptype = 'roadmap')
 
 ```
 
@@ -39,19 +47,37 @@ data.now <- data.here %>% filter(clearance_date_ts < '2017-10-02 00:00:00')
 nrow(data.now)
 # View(data.now)
 
-ggplot(data.now, aes(x = Longitude, y = Latitude)) +
-  geom_point(colour = "black", alpha = 0.25) +
-  coord_map()
+groups <- c("TRAFFIC RELATED CALLS", "THREATS, HARRASSMENT", "SUSPICIOUS CIRCUMSTANCES", "ROBBERY",
+            "PERSON DOWN/INJURY", "NUISANCE, MISCHEIF", "NARCOTICS COMPLAINTS", "LEWD CONDUCT", 
+            "DRIVE BY (NO INJURY)", "DISTURBANCES", "BIKE", "BEHAVIORAL HEALTH", "ASSUALTS")
+
+data.ped <- data.now %>% filter(str_detect(Event.Clearance.Group, paste(groups, collapse="|")))
+
+ggmap(seattle) +
+   geom_point(data = data.ped, aes(x = Longitude, y = Latitude), colour = "red", alpha = 0.75)
+  #coord_map()
 
 ```
 
 ```{r}
-freq_by_subgroup <- table(data.now$Event.Clearance.Group)
+freq_by_subgroup <- table(droplevels(data.ped$Event.Clearance.Group))
 # View(freq_by_subgroup)
 
 ggplot(as.data.frame(freq_by_subgroup), 
        aes(x = Var1, y = Freq)) +
        geom_bar(stat = 'identity') +# create bar plot
     coord_flip()
+
+#Traffic related calls, suspicious circumstances, and disturbances are the the most significant threats to pedestrations
         
+```
+
+```{r}
+ggplot(data.ped, aes(x = Longitude, y = Latitude, group = Event.Clearance.Group, color = Event.Clearance.Group)) +
+  geom_point(alpha = 0.75) +
+  facet_wrap(~ Event.Clearance.Group)+
+  coord_map() +
+  theme(axis.ticks = element_blank(),
+        legend.position = "none"
+        )
 ```
