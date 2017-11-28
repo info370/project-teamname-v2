@@ -12,7 +12,7 @@ library(geosphere)
 library(stringr)
 library(rgdal)
 if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
-path.to.csv <- '~/documents/INFO370/project-teamname-v2/Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
+path.to.csv <- '../Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
 spd.911 <- read.csv(path.to.csv, TRUE)
 
 spd.911$clearance_date_ts = as.POSIXct(strptime(spd.911$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))
