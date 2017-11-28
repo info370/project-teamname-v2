@@ -37,18 +37,20 @@ spd.911 <- spd.911 %>%
              mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(here_long, here_lat)))              
 nrow(spd.911)
 
-descriptions <- c("THEFT - CAR PROWL", "SUSPICIOUS PERSON", "STRONG ARM ROBBERY", "PERSON WITH A WEAPON (NOT GUN)", "HAZARDS", "HARRASMENT, THREATS", "FIGHT DISTURBANCE", "CRISIS COMPLAINT - GENERAL", "ARMED ROBBERY")
+descriptions <- c("STRONG ARM ROBBERY", "PERSON WITH A WEAPON (NOT GUN)", "HAZARDS", "HARRASMENT, THREATS", "FIGHT DISTURBANCE", "CRISIS COMPLAINT - GENERAL", "ARMED ROBBERY")
 
 data.ped <- spd.911 %>% filter(str_detect(Event.Clearance.Description, paste(descriptions, collapse="|")))
 # data.ped <- data.now
+nrow(data.ped)
 
-data.now <- data.ped %>% filter(clearance_date_ts < '2017-10-02 00:00:00')
-
+data.now <- data.ped %>% filter(clearance_date_ts < '2017-10-31 00:00:00')
+nrow(data.now)
                   
 data.here <- data.now %>% filter(dist < 4600)
-nrow(data.here)
 
 data <- data.here
+nrow(data)
+# View(data)
 
 ggmap(seattle) +
    geom_point(data = data, aes(x = Longitude, y = Latitude), colour = "red", alpha = 0.75)
@@ -72,11 +74,54 @@ ggplot(as.data.frame(freq_by_desc),
 
 ```{r}
 ggmap(seattle) +
-  geom_point(data = data, aes(x = Longitude, y = Latitude, group = Event.Clearance.Description, color = Event.Clearance.Description), alpha = 1) +
+  geom_point(data = data, aes(x = Longitude, y = Latitude, group = Event.Clearance.Description, color = Event.Clearance.Description), alpha = 0.5) +
   facet_wrap(~ Event.Clearance.Description) +
   theme(axis.ticks = element_blank(), 
         axis.text.x = element_blank(),
         axis.text.y = element_blank(),
         legend.position = "none"
         )
+```
+
+```{r}
+#     2115405    -122.3317    47.61926    
+#2    2107301    -122.3320    47.61969    
+#3    2111353    -122.3312    47.62061    
+#4    2123525    -122.3320    47.62172    
+#5    2119457    -122.3311    47.61982 (ed
+id <- c(2115405, 2107301, 2111353, 2123525, 2119457)
+long <- c(-122.3317, -122.3320, -122.3312, -122.3320, -122.3311)
+lat <- c(47.61926, 47.61969, 47.62061, 47.62172, 47.61982)
+clusters <- data.frame(id, lat, long)
+clusters
+
+ggmap(seattle) +
+  geom_point(data = clusters, 
+             aes(x = long, y = lat), alpha = 0.5, color = "blue")
+```
+
+```{r}
+# selecting just ID and location data
+df_loc <- spd.911 %>% dplyr::select(CAD.CDW.ID, Longitude, Latitude)
+
+# figuring out number of clusters
+wss <- c()
+# clusters 1 to 15
+for (i in 1:15) {
+  wss[i] <- sum(kmeans(df_loc, centers=i)$withinss)
+}
+plot(1:15, wss, type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+
+# fitting model
+fit <- kmeans(df_loc, 5)
+fit # look at cluster sizes and means. want clusters to be about equal size
+
+# looking at cluster means
+aggregate(df_loc, by=list(fit$cluster), FUN=mean)
+
+# adding data back into dataframe 
+df_loc <- df_loc %>% mutate(cluster = fit$cluster) 
+
+View(df_loc)
 ```
