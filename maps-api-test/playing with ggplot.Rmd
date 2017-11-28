@@ -80,3 +80,31 @@ ggmap(seattle) +
         legend.position = "none"
         )
 ```
+
+
+K-Means clustering by location
+From https://www.statmethods.net/advstats/cluster.html
+```{r}
+# selecting just ID and location data
+df_loc <- spd.911 %>% dplyr::select(CAD.CDW.ID, Longitude, Latitude)
+
+# figuring out number of clusters
+wss <- c()
+# clusters 1 to 15
+for (i in 1:15) {
+  wss[i] <- sum(kmeans(df_loc, centers=i)$withinss)
+}
+plot(1:15, wss, type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+
+# fitting model
+fit <- kmeans(df_loc, 5)
+fit # look at cluster sizes and means. want clusters to be about equal size
+
+# looking at cluster means
+aggregate(df_loc, by=list(fit$cluster), FUN=mean)
+
+# adding data back into dataframe 
+df_loc <- df_loc %>% mutate(cluster = fit$cluster) 
+```
+
