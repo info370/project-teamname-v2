@@ -32,54 +32,51 @@ seattle = get_map(location = c(here_long, here_lat), zoom = 13, maptype = 'roadm
 ```
 
 ```{r}
-
-
-          
-#distVincentyEllipsoid(c(here_long, here_lat), c(-122.3174, 47.663972))
-                      
-nrow(spd.911)
-
 spd.911 <- spd.911 %>% 
              rowwise() %>% 
-             mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(here_long, here_lat)))
+             mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(here_long, here_lat)))              
+nrow(spd.911)
+
+descriptions <- c("THEFT - CAR PROWL", "SUSPICIOUS PERSON", "STRONG ARM ROBBERY", "PERSON WITH A WEAPON (NOT GUN)", "HAZARDS", "HARRASMENT, THREATS", "FIGHT DISTURBANCE", "CRISIS COMPLAINT - GENERAL", "ARMED ROBBERY")
+
+data.ped <- spd.911 %>% filter(str_detect(Event.Clearance.Description, paste(descriptions, collapse="|")))
+# data.ped <- data.now
+
+data.now <- data.ped %>% filter(clearance_date_ts < '2017-10-02 00:00:00')
+
                   
-data.here <- spd.911 %>% filter(dist < 4600)
+data.here <- data.now %>% filter(dist < 4600)
 nrow(data.here)
-data.now <- data.here %>% filter(clearance_date_ts < '2017-10-02 00:00:00')
-nrow(data.now)
-# View(data.now)
 
-groups <- c("TRAFFIC RELATED CALLS", "THREATS, HARRASSMENT", "SUSPICIOUS CIRCUMSTANCES", "ROBBERY",
-            "PERSON DOWN/INJURY", "NUISANCE, MISCHEIF", "NARCOTICS COMPLAINTS", "LEWD CONDUCT", 
-            "DRIVE BY (NO INJURY)", "DISTURBANCES", "BIKE", "BEHAVIORAL HEALTH", "ASSUALTS")
-
-data.ped <- data.now %>% filter(str_detect(Event.Clearance.Group, paste(groups, collapse="|")))
+data <- data.here
 
 ggmap(seattle) +
-   geom_point(data = data.ped, aes(x = Longitude, y = Latitude), colour = "red", alpha = 0.75)
+   geom_point(data = data, aes(x = Longitude, y = Latitude), colour = "red", alpha = 0.75)
   #coord_map()
 
 ```
 
 ```{r}
-freq_by_subgroup <- table(droplevels(data.ped$Event.Clearance.Group))
-# View(freq_by_subgroup)
+freq_by_desc <- table(droplevels(data$Event.Clearance.Description))
+# View(freq_by_desc)
 
-ggplot(as.data.frame(freq_by_subgroup), 
+ggplot(as.data.frame(freq_by_desc), 
        aes(x = Var1, y = Freq)) +
        geom_bar(stat = 'identity') +# create bar plot
     coord_flip()
 
 #Traffic related calls, suspicious circumstances, and disturbances are the the most significant threats to pedestrations
+
         
 ```
 
 ```{r}
 ggmap(seattle) +
-  geom_point(data = data.ped, aes(x = Longitude, y = Latitude, group = Event.Clearance.Group, color = Event.Clearance.Group), alpha = 1) +
-  # facet_wrap(~ Event.Clearance.Group, ncol = 2) +
+  geom_point(data = data, aes(x = Longitude, y = Latitude, group = Event.Clearance.Description, color = Event.Clearance.Description), alpha = 1) +
+  facet_wrap(~ Event.Clearance.Description) +
   theme(axis.ticks = element_blank(), 
         axis.text.x = element_blank(),
-        axis.text.y = element_blank()
+        axis.text.y = element_blank(),
+        legend.position = "none"
         )
 ```
