@@ -22,16 +22,18 @@ spd.911$clearance_date_date = as.Date(spd.911$clearance_date_ts)
 # path to the FOLDER with the .shp file in it. the second param is the name of the .shp file
 # seattle <- readOGR(dsn = path.expand("~/documents/INFO370/project-teamname-v2/maps-api-test"), layer = "Seattle_City_Limits")
 
-seattle = get_map(location = c(lon = -122.31, lat = 47.61), zoom = 12, maptype = 'roadmap')
+# usa <- map_data("state")
+# data <- merge(usa, spd.911)
+here_long <-  -122.30
+here_lat <- 47.66
+
+seattle = get_map(location = c(here_long, here_lat), zoom = 13, maptype = 'roadmap')
 
 ```
 
 ```{r}
 
-# usa <- map_data("state")
-# data <- merge(usa, spd.911)
-here_long <-  -122.307050
-here_lat <- 47.663851099999995
+
           
 #distVincentyEllipsoid(c(here_long, here_lat), c(-122.3174, 47.663972))
                       
@@ -73,11 +75,11 @@ ggplot(as.data.frame(freq_by_subgroup),
 ```
 
 ```{r}
-ggplot(data.ped, aes(x = Longitude, y = Latitude, group = Event.Clearance.Group, color = Event.Clearance.Group)) +
-  geom_point(alpha = 0.75) +
-  facet_wrap(~ Event.Clearance.Group)+
-  coord_map() +
-  theme(axis.ticks = element_blank(),
-        legend.position = "none"
+ggmap(seattle) +
+  geom_point(data = data.ped, aes(x = Longitude, y = Latitude, group = Event.Clearance.Group, color = Event.Clearance.Group), alpha = 1) +
+  # facet_wrap(~ Event.Clearance.Group, ncol = 2) +
+  theme(axis.ticks = element_blank(), 
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank()
         )
 ```
