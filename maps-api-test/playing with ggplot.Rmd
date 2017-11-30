@@ -11,6 +11,7 @@ require("maps")
 library(geosphere)
 library(stringr)
 library(rgdal)
+library(caret)
 if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
 path.to.csv <- '../Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
 spd.911 <- read.csv(path.to.csv, TRUE)
@@ -18,6 +19,8 @@ spd.911 <- read.csv(path.to.csv, TRUE)
 spd.911$clearance_date_ts = as.POSIXct(strptime(spd.911$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))
 spd.911$clearance_date_date = as.Date(spd.911$clearance_date_ts)
 # View(spd.911)
+
+
 
 # path to the FOLDER with the .shp file in it. the second param is the name of the .shp file
 # seattle <- readOGR(dsn = path.expand("~/documents/INFO370/project-teamname-v2/maps-api-test"), layer = "Seattle_City_Limits")
@@ -30,6 +33,7 @@ here_lat <- 47.66
 seattle = get_map(location = c(here_long, here_lat), zoom = 13, maptype = 'roadmap')
 
 ```
+
 
 ```{r}
 spd.911 <- spd.911 %>% 
@@ -84,25 +88,8 @@ ggmap(seattle) +
 ```
 
 ```{r}
-#     2115405    -122.3317    47.61926    
-#2    2107301    -122.3320    47.61969    
-#3    2111353    -122.3312    47.62061    
-#4    2123525    -122.3320    47.62172    
-#5    2119457    -122.3311    47.61982 (ed
-id <- c(2115405, 2107301, 2111353, 2123525, 2119457)
-long <- c(-122.3317, -122.3320, -122.3312, -122.3320, -122.3311)
-lat <- c(47.61926, 47.61969, 47.62061, 47.62172, 47.61982)
-clusters <- data.frame(id, lat, long)
-clusters
-
-ggmap(seattle) +
-  geom_point(data = clusters, 
-             aes(x = long, y = lat), alpha = 0.5, color = "blue")
-```
-
-```{r}
 # selecting just ID and location data
-df_loc <- spd.911 %>% dplyr::select(CAD.CDW.ID, Longitude, Latitude)
+df_loc <- data %>% dplyr::select(CAD.CDW.ID, Longitude, Latitude)
 
 # figuring out number of clusters
 wss <- c()
@@ -114,14 +101,49 @@ plot(1:15, wss, type="b", xlab="Number of Clusters",
   ylab="Within groups sum of squares")
 
 # fitting model
-fit <- kmeans(df_loc, 5)
-fit # look at cluster sizes and means. want clusters to be about equal size
+fit <- kmeans(df_loc, 10)
+fit$centers # look at cluster sizes and means. want clusters to be about equal size
+fit$cluster
+cluster.size <- data.frame(1:10, fit$size)
+cluster.size
 
+ggplot(data = cluster.size, aes(x = X1.10, y = fit.size)) +
+  geom_bar(stat = 'identity')
+ggplot()
+ggmap(seattle) +
+  geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
 # looking at cluster means
 aggregate(df_loc, by=list(fit$cluster), FUN=mean)
 
-# adding data back into dataframe 
-df_loc <- df_loc %>% mutate(cluster = fit$cluster) 
+df_loc
 
-View(df_loc)
+# adding data back into dataframe 
+# df_loc <- df_loc %>% mutate(cluster = fit$cluster) 
+data$cluster <- fit$cluster
+
+# View(data)
+```
+
+```{r}
+col.names <- paste(c("Event.Clearance.Code", "cluster", "Census.Tract"), collapse="|")
+cols <- grep(col.names, colnames(data))
+cols
+corr_matrix <- cor(data[,cols]) # correlations between all predictor vars
+corr_matrix
+
+cutoff <- 0.5 # should be higher in practice
+
+highly_corr <- findCorrelation(corr_matrix, cutoff=cutoff)
+print(colnames(spd.911)[highly_corr]) # age is highly correalted with pregnant
+
+train.data <- select(data, c("Event.Clearance.Code", "cluster", "Census.Tract", "District.Sector", "Longitude", "Latitude"))
+data <- data %>% droplevels()
+control <- trainControl(method="repeatedcv", number = 10, repeats = 3)
+
+train.data
+model <- train(Event.Clearance.Code ~., data=as.data.frame(train.data), method = "knn", preProcess = "scale", trControl = control)
+
+importance <- varImp(model)
+
+ggplot(importance)
 ```
