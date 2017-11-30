@@ -1,0 +1,67 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+# install.packages("tidyverse");
+# install.packages("rgdal");
+library(tidyverse)
+require("maps")
+library(geosphere)
+library(stringr)
+library(rgdal)
+library(caret)
+library(lubridate)
+setwd("C:/Users/iGuest/Desktop/project-teamname-v2/maps-api-test") # CHANGE TO USE OWN WD IF NEEDED
+if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
+path.to.csv <- 'udistrict.csv'
+spd.911 <- read.csv(path.to.csv, TRUE)
+
+spd.911$clearance_date_ts = as.POSIXct(strptime(spd.911$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))
+spd.911$clearance_date_date = as.Date(spd.911$clearance_date_ts)
+# View(spd.911)
+
+
+
+# path to the FOLDER with the .shp file in it. the second param is the name of the .shp file
+# seattle <- readOGR(dsn = path.expand("~/documents/INFO370/project-teamname-v2/maps-api-test"), layer = "Seattle_City_Limits")
+
+# usa <- map_data("state")
+# data <- merge(usa, spd.911)
+here_long <-  -122.30
+here_lat <- 47.66
+
+seattle = get_map(location = c(here_long, here_lat), zoom = 13, maptype = 'roadmap')
+```
+```{r}
+spd.911.unfilt <- spd.911
+spd.911 <- spd.911.unfilt %>% 
+             rowwise() %>% 
+             mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(here_long, here_lat)))              
+nrow(spd.911)
+
+descriptions <- c("STRONG ARM ROBBERY", "PERSON WITH A WEAPON (NOT GUN)", "HAZARDS", "HARRASMENT, THREATS", "FIGHT DISTURBANCE", "CRISIS COMPLAINT - GENERAL", "ARMED ROBBERY")
+
+data.ped <- spd.911 %>% filter(str_detect(Event.Clearance.Description, paste(descriptions, collapse="|")))
+# data.ped <- data.now
+nrow(data.ped)
+
+data.now <- data.ped %>% filter(clearance_date_ts < '2016-01-01 00:00:00')
+nrow(data.now)
+                  
+data.here <- data.now %>% filter(dist < 4600) 
+
+data <- data.here # This is data that is from one year ago, violent crimes only, filtered to be within a certain range
+nrow(data)
+# View(data)
+
+ggmap(seattle) +
+   geom_point(data = data, aes(x = Longitude, y = Latitude), colour = "red", alpha = 0.75)
+  #coord_map()
+
+# TODO: BIN INTO HOUR LONG SECTIONS, PLOT SMALL MULTIPLES AND ALSO ONE OVERLAPPING
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
