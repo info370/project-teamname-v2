@@ -47,7 +47,7 @@ data.ped <- spd.911 %>% filter(str_detect(Event.Clearance.Description, paste(des
 # data.ped <- data.now
 nrow(data.ped)
 
-data.now <- data.ped %>% filter(clearance_date_ts < '2016-01-01 00:00:00')
+data.now <- data.ped %>% filter(clearance_date_ts > '2016-01-01 00:00:00') # Filters data within last year
 nrow(data.now)
                   
 data.here <- data.now %>% filter(dist < 4600) 
@@ -61,6 +61,13 @@ ggmap(seattle) +
   #coord_map()
 
 # TODO: BIN INTO HOUR LONG SECTIONS, PLOT SMALL MULTIPLES AND ALSO ONE OVERLAPPING
+```
+
+```{r}
+# Mutate new column giving hour of day solved. Using Event Clearance Date since time reported is unfortunately not available
+
+clear_hour = as.POSIXct(strptime(data$Event.Clearance.Date, "%H"))
+data <- data %>% mutate(hour = (hour(Event.Clearance.Date)))
 ```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
