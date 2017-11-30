@@ -11,6 +11,8 @@ require("maps")
 library(geosphere)
 library(stringr)
 library(rgdal)
+library(caret)
+library(lubridate)
 if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
 path.to.csv <- '../Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
 spd.911 <- read.csv(path.to.csv, TRUE)
@@ -18,6 +20,8 @@ spd.911 <- read.csv(path.to.csv, TRUE)
 spd.911$clearance_date_ts = as.POSIXct(strptime(spd.911$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))
 spd.911$clearance_date_date = as.Date(spd.911$clearance_date_ts)
 # View(spd.911)
+
+
 
 # path to the FOLDER with the .shp file in it. the second param is the name of the .shp file
 # seattle <- readOGR(dsn = path.expand("~/documents/INFO370/project-teamname-v2/maps-api-test"), layer = "Seattle_City_Limits")
@@ -31,24 +35,27 @@ seattle = get_map(location = c(here_long, here_lat), zoom = 13, maptype = 'roadm
 
 ```
 
+
 ```{r}
 spd.911 <- spd.911 %>% 
              rowwise() %>% 
              mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(here_long, here_lat)))              
 nrow(spd.911)
 
-descriptions <- c("THEFT - CAR PROWL", "SUSPICIOUS PERSON", "STRONG ARM ROBBERY", "PERSON WITH A WEAPON (NOT GUN)", "HAZARDS", "HARRASMENT, THREATS", "FIGHT DISTURBANCE", "CRISIS COMPLAINT - GENERAL", "ARMED ROBBERY")
+descriptions <- c("STRONG ARM ROBBERY", "PERSON WITH A WEAPON (NOT GUN)", "HAZARDS", "HARRASMENT, THREATS", "FIGHT DISTURBANCE", "CRISIS COMPLAINT - GENERAL", "ARMED ROBBERY")
 
 data.ped <- spd.911 %>% filter(str_detect(Event.Clearance.Description, paste(descriptions, collapse="|")))
 # data.ped <- data.now
+nrow(data.ped)
 
-data.now <- data.ped %>% filter(clearance_date_ts < '2017-10-02 00:00:00')
-
+data.now <- data.ped %>% filter(clearance_date_ts < '2017-10-31 00:00:00')
+nrow(data.now)
                   
 data.here <- data.now %>% filter(dist < 4600)
-nrow(data.here)
 
 data <- data.here
+nrow(data)
+# View(data)
 
 ggmap(seattle) +
    geom_point(data = data, aes(x = Longitude, y = Latitude), colour = "red", alpha = 0.75)
@@ -72,11 +79,119 @@ ggplot(as.data.frame(freq_by_desc),
 
 ```{r}
 ggmap(seattle) +
-  geom_point(data = data, aes(x = Longitude, y = Latitude, group = Event.Clearance.Description, color = Event.Clearance.Description), alpha = 1) +
+  geom_point(data = data, aes(x = Longitude, y = Latitude, group = Event.Clearance.Description, color = Event.Clearance.Description), alpha = 0.5) +
   facet_wrap(~ Event.Clearance.Description) +
   theme(axis.ticks = element_blank(), 
         axis.text.x = element_blank(),
         axis.text.y = element_blank(),
         legend.position = "none"
         )
+```
+
+```{r}
+# selecting just ID and location data
+df_loc <- data %>% dplyr::select(CAD.CDW.ID, Longitude, Latitude)
+
+# figuring out number of clusters
+wss <- c()
+# clusters 1 to 15
+for (i in 1:15) {
+  wss[i] <- sum(kmeans(df_loc, centers=i)$withinss)
+}
+plot(1:15, wss, type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+
+# fitting model
+fit <- kmeans(df_loc, 10)
+fit$centers # look at cluster sizes and means. want clusters to be about equal size
+fit$cluster
+cluster.size <- data.frame(1:10, fit$size)
+cluster.size
+
+ggplot(data = cluster.size, aes(x = X1.10, y = fit.size)) +
+  geom_bar(stat = 'identity')
+ggplot()
+ggmap(seattle) +
+  geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
+# looking at cluster means
+aggregate(df_loc, by=list(fit$cluster), FUN=mean)
+
+df_loc
+
+# adding data back into dataframe 
+# df_loc <- df_loc %>% mutate(cluster = fit$cluster) 
+data$cluster <- fit$cluster
+
+# View(data)
+```
+
+```{r}
+# timestamp ->  year  month day hour  minute
+# sector -> to factor (there are 17 sectors)
+# beat -> to factor (there are 3 beats per sector)
+
+# clean the data a bit more
+data$event_clearance_ts = as.POSIXct(strptime(data$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))
+data$event_clearance_date = as.Date(data$event_clearance_ts)
+data$event_clearance_month = month(ymd_hms(as.character(data$event_clearance_ts)))
+data$event_clearance_day = weekdays(data$event_clearance_date)
+data$event_clearance_hr = hour(ymd_hms(as.character(data$event_clearance_ts)))
+data$event_clearance_mn = minute(ymd_hms(as.character(data$event_clearance_ts)))
+data$Initial.Type.Group = factor(data$Initial.Type.Group)
+data$Event.Clearance.Group = factor(data$Event.Clearance.Group)
+data$Zone.Beat = factor(data$Zone.Beat)
+data$District.Sector = factor(data$District.Sector)
+data$event_clearance_day = factor(data$event_clearance_day)
+data
+
+col.names <- paste(c(
+  "Event.Clearance.Code"
+  , "cluster"
+  , "Census.Tract"
+  , "event_clearance_day"
+  , "Event.Clearance.Group"
+  , "Event.Clearance.SubGroup"
+  , "District.Sector"
+  , "Zone.Beat"
+  #, "event_clearance_ts"
+  # ,"Incident.Location"
+  , "event_clearance_hr"
+  , "event_clearance_mn"
+  , "event_clearance_month" 
+  , "Hundred.Block.Location"
+  ), collapse="|")
+cols <- grep(col.names, colnames(data))
+cols
+# corr_matrix <- cor(data[,cols]) # correlations between all predictor vars
+# corr_matrix
+
+# cutoff <- 0.5 # should be higher in practice
+
+# highly_corr <- findCorrelation(corr_matrix, cutoff=cutoff)
+# print(colnames(spd.911)[highly_corr]) # age is highly correalted with pregnant
+
+train.data <- select(data, cols)
+train.data
+# data <- data %>% droplevels()
+
+# grep("Hundred.Block.Location", colnames(train.data), invert = T)
+
+predictors <- grep("Hundred.Block.Location", colnames(train.data), invert = T)
+outcome <- grep("Hundred.Block.Location", colnames(train.data))
+
+# train.data[,predictors]
+frame <- data.frame(train.data[,predictors])
+frame
+out.factor <- train.data$Hundred.Block.Location
+as.vector(out.factor)
+
+
+control <- rfeControl(functions = rfFuncs, method="cv", number=10)
+results <- rfe(frame, out.factor, sizes = c(1:13), rfeControl = control) # this will take AWHILE...
+
+results
+ggplot(results)
+
+# chosen features
+predictors(results)
 ```
