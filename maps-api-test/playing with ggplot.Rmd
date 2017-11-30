@@ -12,6 +12,7 @@ library(geosphere)
 library(stringr)
 library(rgdal)
 library(caret)
+library(lubridate)
 if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
 path.to.csv <- '../Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
 spd.911 <- read.csv(path.to.csv, TRUE)
@@ -125,25 +126,72 @@ data$cluster <- fit$cluster
 ```
 
 ```{r}
-col.names <- paste(c("Event.Clearance.Code", "cluster", "Census.Tract"), collapse="|")
+# timestamp ->  year  month day hour  minute
+# sector -> to factor (there are 17 sectors)
+# beat -> to factor (there are 3 beats per sector)
+
+# clean the data a bit more
+data$event_clearance_ts = as.POSIXct(strptime(data$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))
+data$event_clearance_date = as.Date(data$event_clearance_ts)
+data$event_clearance_month = month(ymd_hms(as.character(data$event_clearance_ts)))
+data$event_clearance_day = weekdays(data$event_clearance_date)
+data$event_clearance_hr = hour(ymd_hms(as.character(data$event_clearance_ts)))
+data$event_clearance_mn = minute(ymd_hms(as.character(data$event_clearance_ts)))
+data$Initial.Type.Group = factor(data$Initial.Type.Group)
+data$Event.Clearance.Group = factor(data$Event.Clearance.Group)
+data$Zone.Beat = factor(data$Zone.Beat)
+data$District.Sector = factor(data$District.Sector)
+data$event_clearance_day = factor(data$event_clearance_day)
+data
+
+col.names <- paste(c(
+  "Event.Clearance.Code"
+  , "cluster"
+  , "Census.Tract"
+  , "event_clearance_day"
+  , "Event.Clearance.Group"
+  , "Event.Clearance.SubGroup"
+  , "District.Sector"
+  , "Zone.Beat"
+  #, "event_clearance_ts"
+  # ,"Incident.Location"
+  , "event_clearance_hr"
+  , "event_clearance_mn"
+  , "event_clearance_month" 
+  , "Hundred.Block.Location"
+  ), collapse="|")
 cols <- grep(col.names, colnames(data))
 cols
-corr_matrix <- cor(data[,cols]) # correlations between all predictor vars
-corr_matrix
+# corr_matrix <- cor(data[,cols]) # correlations between all predictor vars
+# corr_matrix
 
-cutoff <- 0.5 # should be higher in practice
+# cutoff <- 0.5 # should be higher in practice
 
-highly_corr <- findCorrelation(corr_matrix, cutoff=cutoff)
-print(colnames(spd.911)[highly_corr]) # age is highly correalted with pregnant
+# highly_corr <- findCorrelation(corr_matrix, cutoff=cutoff)
+# print(colnames(spd.911)[highly_corr]) # age is highly correalted with pregnant
 
-train.data <- select(data, c("Event.Clearance.Code", "cluster", "Census.Tract", "District.Sector", "Longitude", "Latitude"))
-data <- data %>% droplevels()
-control <- trainControl(method="repeatedcv", number = 10, repeats = 3)
-
+train.data <- select(data, cols)
 train.data
-model <- train(Event.Clearance.Code ~., data=as.data.frame(train.data), method = "knn", preProcess = "scale", trControl = control)
+# data <- data %>% droplevels()
 
-importance <- varImp(model)
+# grep("Hundred.Block.Location", colnames(train.data), invert = T)
 
-ggplot(importance)
+predictors <- grep("Hundred.Block.Location", colnames(train.data), invert = T)
+outcome <- grep("Hundred.Block.Location", colnames(train.data))
+
+# train.data[,predictors]
+frame <- data.frame(train.data[,predictors])
+frame
+out.factor <- train.data$Hundred.Block.Location
+as.vector(out.factor)
+
+
+control <- rfeControl(functions = rfFuncs, method="cv", number=10)
+results <- rfe(frame, out.factor, sizes = c(1:13), rfeControl = control) # this will take AWHILE...
+
+results
+ggplot(results)
+
+# chosen features
+predictors(results)
 ```
