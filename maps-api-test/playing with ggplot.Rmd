@@ -14,7 +14,7 @@ library(rgdal)
 library(caret)
 library(lubridate)
 if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
-path.to.csv <- '../Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
+path.to.csv <- '../Year_911_Data.csv'
 spd.911 <- read.csv(path.to.csv, TRUE)
 
 spd.911$clearance_date_ts = as.POSIXct(strptime(spd.911$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))
@@ -28,8 +28,9 @@ spd.911$clearance_date_date = as.Date(spd.911$clearance_date_ts)
 
 # usa <- map_data("state")
 # data <- merge(usa, spd.911)
-here_long <-  -122.30
-here_lat <- 47.66
+# Red Square coordinates
+here_long <-  -122.3095
+here_lat <- 47.6560
 
 seattle = get_map(location = c(here_long, here_lat), zoom = 13, maptype = 'roadmap')
 
@@ -42,9 +43,10 @@ spd.911 <- spd.911 %>%
              mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(here_long, here_lat)))              
 nrow(spd.911)
 
-descriptions <- c("STRONG ARM ROBBERY", "PERSON WITH A WEAPON (NOT GUN)", "HAZARDS", "HARRASMENT, THREATS", "FIGHT DISTURBANCE", "CRISIS COMPLAINT - GENERAL", "ARMED ROBBERY")
+descriptions <- c("STRONG ARM ROBBERY", "PERSON WITH A WEAPON (NOT GUN)", "HAZARDS", "HARASSMENT, THREATS", "FIGHT DISTURBANCE", "CRISIS COMPLAINT - GENERAL", "ARMED ROBBERY")
 
-data.ped <- spd.911 %>% filter(str_detect(Event.Clearance.Description, paste(descriptions, collapse="|")))
+# Removes Specifically Harassment by Telephone and Writing, as well as other non-scary crimes
+data.ped <- spd.911 %>% filter(str_detect(Event.Clearance.Description, paste(descriptions, collapse="|"))) %>% filter(!str_detect(Event.Clearance.Description, "HARASSMENT, THREATS - BY TELEPHONE, WRITING"))
 # data.ped <- data.now
 nrow(data.ped)
 
