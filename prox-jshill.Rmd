@@ -1,0 +1,25 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+require("maps")
+library(geosphere)
+library(stringr)
+library(rgdal)
+library(caret)
+library(lubridate)
+
+path.to.csv <- "../maps-api-test/October-Clean.csv"
+spd.911 <- read.csv(path.to.csv, TRUE)
+
+here_long <-  -122.30
+here_lat <- 47.66
+
+stops <- read.csv('~/Downloads/stops.csv', TRUE)
+```
+
+
