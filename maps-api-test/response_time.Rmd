@@ -1,0 +1,68 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+# install.packages("tidyverse");
+# install.packages("rgdal");
+library(tidyverse)
+require("maps")
+library(geosphere)
+library(stringr)
+library(rgdal)
+library(caret)
+library(lubridate)
+if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
+path.to.csv <- '../Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
+spd.911 <- read.csv(path.to.csv, TRUE)
+
+spd.911$clearance_date_ts = as.POSIXct(strptime(spd.911$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))
+spd.911$clearance_date_date = as.Date(spd.911$clearance_date_ts)
+spd.911$at_scene_time_ts = as.POSIXct(strptime(spd.911$At.Scene.Time, "%m/%d/%Y %I:%M:%S %p"))
+spd.911$at_scene_time_hr = hour(ymd_hms(as.character(spd.911$at_scene_time_ts)))
+spd.911$at_scene_time_date = as.Date(spd.911$at_scene_time_ts)
+spd.911$event_clearance_ts = as.POSIXct(strptime(spd.911$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))
+spd.911$event_clearance_date = as.Date(spd.911$event_clearance_ts)
+spd.911$event_clearance_hr = hour(ymd_hms(as.character(spd.911$event_clearance_ts)))
+
+View(spd.911)
+
+
+
+# path to the FOLDER with the .shp file in it. the second param is the name of the .shp file
+# seattle <- readOGR(dsn = path.expand("~/documents/INFO370/project-teamname-v2/maps-api-test"), layer = "Seattle_City_Limits")
+
+# usa <- map_data("state")
+# data <- merge(usa, spd.911)
+here_long <-  -122.30
+here_lat <- 47.66
+
+seattle = get_map(location = c(here_long, here_lat), zoom = 13, maptype = 'roadmap')
+
+```
+
+```{r}
+spd.911 <- spd.911 %>% 
+             rowwise() %>% 
+             mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(here_long, here_lat)))              
+nrow(spd.911)
+
+descriptions <- c("STRONG ARM ROBBERY", "PERSON WITH A WEAPON (NOT GUN)", "HAZARDS", "HARRASMENT, THREATS", "FIGHT DISTURBANCE", "CRISIS COMPLAINT - GENERAL", "ARMED ROBBERY")
+
+data.ped <- spd.911 %>% filter(str_detect(Event.Clearance.Description, paste(descriptions, collapse="|")))
+
+
+data.filtered <- data.ped %>% filter(!is.na(at_scene_time_ts))
+data.filtered$time_until_event_clear = as.numeric(data.filtered$event_clearance_ts - data.filtered$at_scene_time_ts)
+
+data <- data.filtered %>% filter(dist < 2600)
+
+
+ggmap(seattle) + 
+  geom_point(data = data, aes(x = Longitude, y = Latitude, colour = data$time_until_event_clear))
+            scale_colour_gradient(low="black", high="white")
+            
+
+```
+
