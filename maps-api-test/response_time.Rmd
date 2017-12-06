@@ -14,8 +14,9 @@ library(rgdal)
 library(caret)
 library(lubridate)
 if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
-path.to.csv <- '../Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
+path.to.csv <- './YearSEAPD.csv'
 spd.911 <- read.csv(path.to.csv, TRUE)
+View(spd.911)
 
 spd.911$clearance_date_ts = as.POSIXct(strptime(spd.911$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))
 spd.911$clearance_date_date = as.Date(spd.911$clearance_date_ts)
@@ -57,11 +58,12 @@ data.filtered <- data.ped %>% filter(!is.na(at_scene_time_ts))
 data.filtered$time_until_event_clear = as.numeric(data.filtered$event_clearance_ts - data.filtered$at_scene_time_ts)
 
 data <- data.filtered %>% filter(dist < 2600)
-
+mean.time <- mean(data$time_until_event_clear)
+mean.time
 
 ggmap(seattle) + 
-  geom_point(data = data, aes(x = Longitude, y = Latitude, colour = data$time_until_event_clear))
-            scale_colour_gradient(low="black", high="white")
+  geom_point(data = data, aes(x = Longitude, y = Latitude, colour = data$time_until_event_clear)) +
+  scale_colour_gradient(low = "blue", high = "red")
             
 
 ```
