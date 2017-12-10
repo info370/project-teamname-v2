@@ -13,7 +13,7 @@ library(stringr)
 library(rgdal)
 library(caret)
 library(lubridate)
-setwd("C:/Users/iGuest/Desktop/project-teamname-v2/maps-api-test") # CHANGE TO USE OWN WD IF NEEDED
+setwd("D:/Info370/teamname-v2/maps-api-test") # CHANGE TO USE OWN WD IF NEEDED
 if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
 path.to.csv <- 'udistrict.csv'
 spd.911 <- read.csv(path.to.csv, TRUE)
@@ -22,21 +22,17 @@ spd.911$clearance_date_ts = as.POSIXct(strptime(spd.911$Event.Clearance.Date, "%
 spd.911$clearance_date_date = as.Date(spd.911$clearance_date_ts)
 # View(spd.911)
 
+uwpd.911 <- read.csv('UWPD_Data.csv', TRUE)
 
-
-# path to the FOLDER with the .shp file in it. the second param is the name of the .shp file
-# seattle <- readOGR(dsn = path.expand("~/documents/INFO370/project-teamname-v2/maps-api-test"), layer = "Seattle_City_Limits")
-
-# usa <- map_data("state")
-# data <- merge(usa, spd.911)
-here_long <-  -122.30
-here_lat <- 47.66
+# 47.6560° N, 122.3095° W is Red Square
+here_long <-  -122.3095
+here_lat <- 47.6560
 
 seattle = get_map(location = c(here_long, here_lat), zoom = 13, maptype = 'roadmap')
 ```
+
 ```{r}
-spd.911.unfilt <- spd.911
-spd.911 <- spd.911.unfilt %>% 
+spd.911 <- spd.911 %>% # Change distance column
              rowwise() %>% 
              mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(here_long, here_lat)))              
 nrow(spd.911)
@@ -59,14 +55,29 @@ nrow(data)
 ggmap(seattle) +
    geom_point(data = data, aes(x = Longitude, y = Latitude), colour = "red", alpha = 0.75)
   #coord_map()
-
-# TODO: BIN INTO HOUR LONG SECTIONS, PLOT SMALL MULTIPLES AND ALSO ONE OVERLAPPING
+write.csv(data, "YearSEAPD.csv")
 ```
 
 ```{r}
-# Mutate new column giving hour of day solved. Using Event Clearance Date since time reported is unfortunately not available
 
-clear_hour = as.POSIXct(strptime(data$Event.Clearance.Date, "%H"))
+```
+
+```{r}
+# Mutate new column giving hour of day solved. Using Event Clearance Date since time reported is unfortunately not available NOT DONE
+# TODO: BIN INTO HOUR LONG SECTIONS, PLOT SMALL MULTIPLES AND ALSO ONE OVERLAPPING
+data$event_clearance_ts <- as.POSIXct(strptime(data$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p")) # Ask Jon how this works
+data$event_clearance_date <- as.Date(data$event_clearance_ts)
+data$event_clearance_month <- month(ymd_hms(as.character(data$event_clearance_ts)))
+data$event_clearance_day <- weekdays(data$event_clearance_date)
+data$event_clearance_hr <- hour(ymd_hms(as.character(data$event_clearance_ts)))
+# Temporary checkpoint for now
+# write.csv(data, 'Year-Partially-Cleaned.csv')
+
+strsplit(toString(data[1, "Event.Clearance.Date"]), " ")
+Split.Date.Time <- function(column) {
+  
+}
+hours = as.POSIXct(hour(data$Event.Clearance.Date))
 data <- data %>% mutate(hour = (hour(Event.Clearance.Date)))
 ```
 

@@ -52,6 +52,7 @@ descriptions <- c("STRONG ARM ROBBERY", "PERSON WITH A WEAPON (NOT GUN)", "HAZAR
 data.ped <- spd.911 %>% filter(str_detect(Event.Clearance.Description, paste(descriptions, collapse="|"))) %>% filter(!str_detect(Event.Clearance.Description, "HARASSMENT, THREATS - BY TELEPHONE, WRITING"))
 # data.ped <- data.now
 nrow(data.ped)
+View(data.ped)
 
 # data.now <- data.ped %>% filter(clearance_date_ts < '2017-10-31 00:00:00')
 nrow(data.now)
