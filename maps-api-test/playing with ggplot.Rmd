@@ -14,12 +14,13 @@ library(rgdal)
 library(caret)
 library(lubridate)
 if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
-path.to.csv <- '../Year_911_Data.csv'
+library(ggmap)
+path.to.csv <- '../Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
 spd.911 <- read.csv(path.to.csv, TRUE)
 
 spd.911$clearance_date_ts = as.POSIXct(strptime(spd.911$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))
 spd.911$clearance_date_date = as.Date(spd.911$clearance_date_ts)
-# View(spd.911)
+View(spd.911)
 
 
 
@@ -38,6 +39,8 @@ seattle = get_map(location = c(here_long, here_lat), zoom = 13, maptype = 'roadm
 
 
 ```{r}
+
+
 spd.911 <- spd.911 %>% 
              rowwise() %>% 
              mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(here_long, here_lat)))              
@@ -50,12 +53,12 @@ data.ped <- spd.911 %>% filter(str_detect(Event.Clearance.Description, paste(des
 # data.ped <- data.now
 nrow(data.ped)
 
-data.now <- data.ped %>% filter(clearance_date_ts < '2017-10-31 00:00:00')
+# data.now <- data.ped %>% filter(clearance_date_ts < '2017-10-31 00:00:00')
 nrow(data.now)
                   
-data.here <- data.now %>% filter(dist < 4600)
+data.here <- data.now %>% filter(dist < 2600)
 
-data <- data.here
+data <- read.csv('YearSEAPD.csv', header = TRUE)
 nrow(data)
 # View(data)
 

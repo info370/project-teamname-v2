@@ -13,13 +13,75 @@ library(rgdal)
 library(caret)
 library(lubridate)
 
-path.to.csv <- "../maps-api-test/October-Clean.csv"
+path.to.csv <- "maps-api-test/YearSEAPD.csv"
 spd.911 <- read.csv(path.to.csv, TRUE)
 
-here_long <-  -122.30
-here_lat <- 47.66
+here_long <-  -122.3095
+here_lat <- 47.6560
 
 stops <- read.csv('~/Downloads/stops.csv', TRUE)
+# View(stops)
+```
+
+```{r}
+
+spd.911 <- spd.911 %>% 
+             rowwise() %>% 
+             mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(here_long, here_lat)))              
+nrow(spd.911)
+nrow(stops)
+stops <- stops %>% 
+             rowwise() %>% 
+             mutate(dist=distVincentyEllipsoid(c(stop_lon, stop_lat), c(here_long, here_lat)))    
+
+stops.here <- stops %>% filter(dist < 2600)
+
+nrow(stops.here)
+
+ggmap(seattle) +
+   geom_point(data = stops.here, aes(x = stop_lon, y = stop_lat), colour = "red", alpha = 0.75)
+  #coord_map()
+```
+
+```{r}
+# lets find a way to count the crimes near each bus stop
+
+stop <- stops.here[1,]
+crimes <- spd.911 %>% 
+              rowwise() %>% 
+              mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(stop$stop_lon, stop$stop_lat)))
+nrow(crimes)
+# nrow(data %>% filter(dist < 4600))
+
+crime_count <- integer()
+for(i in 1:nrow(stops.here)) {
+  stop <- stops.here[i,]
+  crimes <- spd.911 %>% 
+              rowwise() %>% 
+              mutate(dist=distVincentyEllipsoid(c(Longitude, Latitude), c(stop$stop_lon, stop$stop_lat)))
+  crime_count[i] <- nrow(crimes %>% filter(dist < 25))
+}
+stops.here$crime_count = crime_count
+# View(stops.here)
+nrow(stops.here[stops.here$crime_count > 0,])
+View(stops.here)
+
+ggmap(seattle) +
+   geom_point(data = stops.here[crime_count > 0,], aes(x = stop_lon, y = stop_lat), colour = "red", alpha = 0.5)
+```
+
+```{r}
+freq.stop <- table(stops.here$crime_count)
+
+ggplot(as.data.frame(freq.stop), 
+       aes(x = Var1, y = Freq)) +
+       scale_y_log10() +
+      xlab('Number of Crimes Reported') +
+        ylab('Count of stops') +
+       geom_histogram(stat = 'identity')
+
+ggmap(seattle) +
+   geom_point(data = stops.here[crime_count > 12,], aes(x = stop_lon, y = stop_lat), colour = "red", alpha = 0.5)
 ```
 
 
