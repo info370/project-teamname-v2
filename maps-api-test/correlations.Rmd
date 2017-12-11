@@ -79,7 +79,9 @@ nrow(data)
 
 write.csv(data, '2016-2017-Clean.csv')
 ```
+#Clustering crimes by Time of Day
 
+Time is a huge factor when discussing pedestrian safety in an error, or so we're told. Common wisdom states that night time is more dangerous than day time, but is this even true? When do crimes get reported, and how does that change where the centers of crime are located. Here we look at a year's worth of SPD data in order to gain some insight.
 ```{r}
 data <- read.csv('2016-2017-Clean.csv', header = TRUE)
 # View(data)
@@ -90,20 +92,26 @@ ggmap(seattle) +
 
 ```
 
+First of, we want to make sure we use as much data as possible. Using reports for all years tract would be ideal, but that data set is too large to handle easily. Instead, we'd like to use just the past year's worth, from November 1st, 2016, all the way to October 31, 2017. That gives us a full year's worth of data to look at, and its far enough in the past from today that we can ensure most, if not all, incidences will be closed (and therefore included in the data set).
+
+Before we go any further though, it is important we determine whether or not the time of year has any meaningful effect on the number of observations we have to work with. If several months have much higher crime rates than others, it may skew results of any analysis we do. With that in mind, let's take a look at the distribution of crimes for each month in the last year:
 ```{r}
 #check frequency by month
 by.month <- table(data$event_clearance_month)
-data.frame(by.month)
+# data.frame(by.month)
+t(by.month)
 cor(1:12, data.frame(by.month)$Freq)
+
+k <- kruskal.test(Freq ~ Var1, by.month)
+k
 
 ggplot(as.data.frame(by.month), 
        aes(x = Var1, y = Freq)) +
        geom_bar(stat = 'identity')
 ```
-
+As we can see, there isn't much varience in the frequency of reported crimes in our area for the past year. 
 ```{r}
 freq_by_desc <- table(droplevels(data$Event.Clearance.Description))
-# View(freq_by_desc)
 
 ggplot(as.data.frame(freq_by_desc), 
        aes(x = Var1, y = Freq)) +
