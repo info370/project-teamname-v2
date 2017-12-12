@@ -10,20 +10,26 @@ ui <- navbarPage("Walk Safely at UW!",
     titlePanel("Wew"),
     mainPanel("Wew2")
   ),
-  tabPanel("Time",
+  tabPanel("Methodology",
+   h1("This is amazing"),
+   titlePanel("Wew"),
+   mainPanel("Wew2")
+  ),
+  tabPanel("Time of Day",
     h1("Page 2"),
     titlePanel("Title"),
     mainPanel("Content WOW")
   ),
+  tabPanel("Clearance Time",
+   h1("Page 3"),
+   titlePanel("Title"),
+   mainPanel("Content WOW")
+  ),
   tabPanel("Proximity",
-    h1("Page 3"),
+    h1("Page 4"),
     titlePanel("Title"),
     mainPanel("Content WOW")
   )
-  # 
-  # h1("My App"),  # first argument
-  # textInput('username', label="What is your name?"),  # second argument, var name first
-  # textOutput('message')  # third argument
 )
 
 shinyUI(ui)
