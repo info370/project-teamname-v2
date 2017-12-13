@@ -33,7 +33,13 @@ server <- function(input, output) {
     return(TimeChart.seven.a(input$time.of.day))
   )
   output$Time.seven.b <- renderPlot(
-    return(TimeChart.seven.b(input$time.of.day))
+    return(TimeChart.seven.b)
+  )
+  output$Time.seven.c <- renderPlot(
+    return(TimeChart.seven.c(input$time.of.day))
+  )
+  output$Time.seven.d <- renderPlot(
+    return(TimeChart.seven.d(input$time.of.day))
   )
 }
 

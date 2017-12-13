@@ -67,9 +67,15 @@ ui <- navbarPage("Walk Safely at UW!",
         plotOutput("Time.six.a"),
         plotOutput("Time.six.b"),
         p("The fact that Crisis Complaints outnumber every other description and its not very specific is skewing our analysis. Let's remove those crimes and try again."),
+        p("Crimes within the last year (No Crisis Complaints)"),
         plotOutput("Time.seven.a"),
+        p("Count of crimes without Crisis Complaints"),
         plotOutput("Time.seven.b"),
-        p("CONCLUSION SKL:FJKL:SDJKL:FJD:SFUIOWEF"),
+        p("Clustering not factoring in Crisis Complaints"),
+        plotOutput("Time.seven.c"),
+        p("Clustering density not factoring in Crisis Complaints"),
+        plotOutput("Time.seven.d"),
+        p("CONCLUSION: TO BE WRITTEN"),
         width = 8
       )
     )
