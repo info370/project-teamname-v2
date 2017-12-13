@@ -125,39 +125,53 @@ by.tod$TOD = factor(by.tod$TOD, levels = by.tod$TOD)
 TimeChart.five <- ggplot(by.tod, aes(x = TOD, y = Count.Crimes)) +
   geom_histogram(stat = 'identity')
 
-# Don't forget early.morning
 TimeChart.six.a <- function(time.of.day) {
-  
+  if(time.of.day == "Morning") {
+    fit <- fit.clusters(morning, 10)
+  }
+  else if(time.of.day == "Mid Day") {
+    fit <- fit.clusters(mid.day, 10)
+  }
+  else if(time.of.day == "Afternoon") {
+    fit <- fit.clusters(afternoon, 10)
+  }
+  else if(time.of.day == "Evening") {
+    fit <- fit.clusters(evening, 10)
+  }
+  else if(time.of.day == "Night") {
+    fit <- fit.clusters(night, 10)
+  }
+  else { # Must be early morning
+    fit <- fit.clusters(early.morning, 10)
+  }
+  current.plot <- ggmap(seattle) +
+    geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5) +
+    labs(title = time.of.day)
+  return(current.plot)
 }
 
 TimeChart.six.b <- function(time.of.day) {
-  
+  if(time.of.day == "Morning") {
+    fit <- fit.clusters(morning, 10)
+  }
+  else if(time.of.day == "Mid Day") {
+    fit <- fit.clusters(mid.day, 10)
+  }
+  else if(time.of.day == "Afternoon") {
+    fit <- fit.clusters(afternoon, 10)
+  }
+  else if(time.of.day == "Evening") {
+    fit <- fit.clusters(evening, 10)
+  }
+  else if(time.of.day == "Night") {
+    fit <- fit.clusters(night, 10)
+  }
+  else { # Must be early morning
+    fit <- fit.clusters(early.morning, 10)
+  }
+  current.plot <- plot.cluster.sizes(fit)
+  return(current.plot)
 }
-
-fit <- fit.clusters(morning, 10)
-ggmap(seattle) +
-  geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
-plot.cluster.sizes(fit)
-
-fit <- fit.clusters(mid.day, 10)
-ggmap(seattle) +
-  geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
-plot.cluster.sizes(fit)
-
-fit <- fit.clusters(afternoon, 10)
-ggmap(seattle) +
-  geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
-plot.cluster.sizes(fit)
-
-fit <- fit.clusters(evening, 10)
-ggmap(seattle) +
-  geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
-plot.cluster.sizes(fit)
-
-fit <- fit.clusters(night, 10)
-ggmap(seattle) +
-  geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
-plot.cluster.sizes(fit)
 
 TimeChart.seven.a <- function(time.of.day) {
   
@@ -166,3 +180,87 @@ TimeChart.seven.a <- function(time.of.day) {
 TimeChart.seven.b <- function(time.of.day) {
   
 }
+
+ #take out general crisis complaint - general
+ data.filtered <- filter(data, Event.Clearance.Description != 'CRISIS COMPLAINT - GENERAL')
+
+ morning.filtered <- filter(data.filtered, 6 <= at_scene_time_hr, at_scene_time_hr < 10 )
+ mid.day.filtered <-  filter(data.filtered, 10 <= at_scene_time_hr, at_scene_time_hr < 14 )
+ afternoon.filtered <-  filter(data.filtered, 14 <= at_scene_time_hr, at_scene_time_hr < 18 )
+ evening.filtered <-  filter(data.filtered, 18 <= at_scene_time_hr, at_scene_time_hr < 22 )
+ night.filtered <-  filter(data.filtered, 22 <= at_scene_time_hr | at_scene_time_hr < 2 )
+ early.morning.filtered <-  filter(data.filtered, 2 <= at_scene_time_hr, at_scene_time_hr < 6 )
+
+ ggmap(seattle) +
+   geom_point(data = morning.filtered, aes(x = Longitude, y = Latitude), alpha = 0.5) +
+   labs(title = 'Morning')
+
+ ggmap(seattle) +
+   geom_point(data = mid.day.filtered, aes(x = Longitude, y = Latitude), alpha = 0.5) +
+   labs(title = 'Mid Day')
+
+ ggmap(seattle) +
+   geom_point(data = afternoon.filtered, aes(x = Longitude, y = Latitude), alpha = 0.5) +
+   labs(title = 'Afternoon')
+
+ ggmap(seattle) +
+   geom_point(data = evening.filtered, aes(x = Longitude, y = Latitude), alpha = 0.5) +
+   labs(title = 'Evening')
+
+ ggmap(seattle) +
+   geom_point(data = night.filtered, aes(x = Longitude, y = Latitude), alpha = 0.5) +
+   labs(title = 'Night')
+
+ ggmap(seattle) +
+   geom_point(data = early.morning.filtered, aes(x = Longitude, y = Latitude), alpha = 0.5) +
+   labs(title = 'Early Morning')
+ lengths.two <- c(nrow(morning.filtered), nrow(mid.day.filtered), nrow(afternoon.filtered), nrow(evening.filtered), nrow(night.filtered), nrow(early.morning.filtered))
+ names.two <- c('Morning\n6:00 - 9:59', 'Mid-day\n10:00 - 1:59', 'Afternoon\n2:00 - 5:59', 'Evening\n6:00 - 9:59', 'Night\n10:00 - 1:59', 'Early Morning\n2:00 - 5:59')
+ by.tod.two <- data.frame('TOD' = names, 'Count.Crimes' = lengths)
+ by.tod.two$TOD = factor(by.tod$TOD, levels = by.tod$TOD)
+
+ ggplot(by.tod.two, aes(x = TOD, y = Count.Crimes)) +
+   geom_histogram(stat = 'identity')
+
+ # find the mode of numeric/character data
+ Mode <- function(x) {
+   ux <- unique(x)
+   tab <- tabulate(match(x, ux)); ux[tab == max(tab)]
+ }
+
+ tod.mean <- mean(data.filtered$at_scene_time_hr)
+ tod.med <- median(data.filtered$at_scene_time_hr)
+ Mode(data.filtered$at_scene_time_hr)
+
+#What is the most common crime committed at each period?
+ Mode(morning.filtered$Event.Clearance.Description)
+ Mode(mid.day.filtered$Event.Clearance.Description)
+ Mode(afternoon.filtered$Event.Clearance.Description)
+ Mode(evening.filtered$Event.Clearance.Description)
+ Mode(night.filtered$Event.Clearance.Description)
+ Mode(early.morning.filtered$Event.Clearance.Description)
+
+ fit <- fit.clusters(morning.filtered, 10)
+ ggmap(seattle) +
+   geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
+ plot.cluster.sizes(fit)
+
+ fit <- fit.clusters(mid.day.filtered, 10)
+ ggmap(seattle) +
+   geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
+ plot.cluster.sizes(fit)
+
+ fit <- fit.clusters(afternoon.filtered, 10)
+ ggmap(seattle) +
+   geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
+ plot.cluster.sizes(fit)
+
+ fit <- fit.clusters(evening.filtered, 10)
+ ggmap(seattle) +
+   geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
+ plot.cluster.sizes(fit)
+
+ fit <- fit.clusters(night.filtered, 10)
+ ggmap(seattle) +
+   geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
+ plot.cluster.sizes(fit)
