@@ -14,8 +14,12 @@ library(rgdal)
 library(caret)
 library(lubridate)
 if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
+<<<<<<< HEAD
+path.to.csv <- './YearSEAPD.csv'
+=======
 library(ggmap)
 path.to.csv <- '../Milestone 2/Seattle_Police_Department_911_Incident_Response_Oct17.csv'
+>>>>>>> be5b41a2873577ad0390e7cec3b73cd335cd0490
 spd.911 <- read.csv(path.to.csv, TRUE)
 
 spd.911$clearance_date_ts = as.POSIXct(strptime(spd.911$Event.Clearance.Date, "%m/%d/%Y %I:%M:%S %p"))

@@ -41,6 +41,8 @@ here_lat <- 47.66
 
 seattle = get_map(location = c(here_long, here_lat), zoom = 13, maptype = 'roadmap')
 
+
+
 ```
 
 ```{r}
@@ -64,6 +66,13 @@ mean.time
 ggmap(seattle) + 
   geom_point(data = data, aes(x = Longitude, y = Latitude, colour = data$time_until_event_clear)) +
   scale_colour_gradient(low = "blue", high = "red")
+
+clearance.frame <- data.frame("time_until_event_clear" = data$time_until_event_clear, 
+                              "Event.Clearance.Description" = data$Event.Clearance.Description)
+
+ggplot(as.data.frame(clearance.frame), 
+       aes(y=time_until_event_clear)) + 
+       geom_point()
             
 
 ```
