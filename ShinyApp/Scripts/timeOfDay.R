@@ -11,7 +11,6 @@ library(ggmap)
 
 here_long <-  -122.3095
 here_lat <- 47.6560
-set.seed(44) # For clustering
 seattle = get_map(location = c(here_long, here_lat), zoom = 13, maptype = 'roadmap')
 
 data <- read.csv('../maps-api-test/2016-2017-Clean.csv', header = TRUE)
@@ -126,6 +125,7 @@ TimeChart.five <- ggplot(by.tod, aes(x = TOD, y = Count.Crimes)) +
   geom_histogram(stat = 'identity')
 
 TimeChart.six.a <- function(time.of.day) {
+  set.seed(44) # For clustering
   if(time.of.day == "Morning") {
     fit <- fit.clusters(morning, 10)
   }
@@ -151,6 +151,7 @@ TimeChart.six.a <- function(time.of.day) {
 }
 
 TimeChart.six.b <- function(time.of.day) {
+  set.seed(44) # For clustering
   if(time.of.day == "Morning") {
     fit <- fit.clusters(morning, 10)
   }
@@ -211,23 +212,24 @@ TimeChart.seven.b <- ggplot(by.tod.two, aes(x = TOD, y = Count.Crimes)) +
   geom_histogram(stat = 'identity')
 
 TimeChart.seven.c <- function(time.of.day) {
+  set.seed(44) # For clustering
   if(time.of.day == "Morning") {
-    fit <- fit.clusters(morning, 10)
+    fit <- fit.clusters(morning.filtered, 10)
   }
   else if(time.of.day == "Mid Day") {
-    fit <- fit.clusters(mid.day, 10)
+    fit <- fit.clusters(mid.day.filtered, 10)
   }
   else if(time.of.day == "Afternoon") {
-    fit <- fit.clusters(afternoon, 10)
+    fit <- fit.clusters(afternoon.filtered, 10)
   }
   else if(time.of.day == "Evening") {
-    fit <- fit.clusters(evening, 10)
+    fit <- fit.clusters(evening.filtered, 10)
   }
   else if(time.of.day == "Night") {
-    fit <- fit.clusters(night, 10)
+    fit <- fit.clusters(night.filtered, 10)
   }
   else { # Must be early morning
-    fit <- fit.clusters(early.morning, 10)
+    fit <- fit.clusters(early.morning.filtered, 10)
   }
   current.plot <- ggmap(seattle) +
     geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5) +
@@ -236,6 +238,7 @@ TimeChart.seven.c <- function(time.of.day) {
 }
 
 TimeChart.seven.d <- function(time.of.day) {
+  set.seed(44) # For clustering
   if(time.of.day == "Morning") {
     fit <- fit.clusters(morning.filtered, 10)
   }
