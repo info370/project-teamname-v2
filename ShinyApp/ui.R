@@ -102,7 +102,21 @@ ui <- navbarPage("Walk Safely at UW!",
         plotOutput("Time.seven.c"),
         p("Clustering density not factoring in Crisis Complaints"),
         plotOutput("Time.seven.d"),
-        p("CONCLUSION: TO BE WRITTEN"),
+        p(
+          "In conclusion, there is varience in reported crime throughout the day. The highest time of activity seems to be around
+          mid day, which might go contrary to belief. It's still yet to be determined what effect less people around during night
+          time has on rate of crime reporting. Intuition should suggest that if there are less people awake to witness crimes, there's
+          a good chance less crime will be reported. This could explain why there are more reported crimes during the day, but it
+          would be interesting to study this in further detail at a later date. For now, we find it advisable to continue being
+          vigilant during all hours of the day."
+        ),
+        p(
+          "From our clustering analysis we can see that the area between 42nd and 50th, Brooklyn to 15th is the hottest spot for 
+          reported pedestrian crimes. While there are outliers that may change throughout the day, most crimes tend to be reported 
+          in this area. Furthermore, it appears that during the afternoon and early morning, most crimes take place on 45th Avenue
+          specifically. This could signal that this stretch of road is advisable to be extra catious of during these times.
+          "
+        ),
         width = 8
       )
     )
