@@ -80,11 +80,22 @@ ui <- navbarPage("Walk Safely at UW!",
       )
     )
   ),
-  tabPanel("Clearance Time",
-   h1("Page 3"),
-   titlePanel("Title"),
-   mainPanel("Content WOW")
-  ),
+  tabPanel("Time of Day",
+    titlePanel("Results of testing by Time of Day"),
+    sidebarLayout(
+      sidebarPanel(style = "position:fixed;width:inherit;",
+        selectInput("time.of.day", "Select Time",
+          list("Morning", "Mid Day", "Afternoon", "Evening", "Night", "Early Morning")
+      ),
+      width = 2),
+      mainPanel(
+        style = "padding-left: 2cm;",
+        p("We will explore the clearance time for these crimes. Clearance time is calculated to be the difference 
+          between the time that that police arrive at the scene and the time at which the crime has officially been 
+          cleared by the Seattle Police Department."),
+        plotOutput("Clearance.one"),
+        width = 8
+      ),
   tabPanel("Proximity",
     h1("Page 4"),
     titlePanel("Title"),

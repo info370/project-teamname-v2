@@ -70,9 +70,6 @@ ggmap(seattle) +
 clearance.frame <- data.frame("time_until_event_clear" = data$time_until_event_clear, 
                               "Event.Clearance.Description" = data$Event.Clearance.Description)
 
-ggplot(as.data.frame(clearance.frame), 
-       aes(y=time_until_event_clear)) + 
-       geom_point()
             
 
 ```
