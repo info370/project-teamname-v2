@@ -200,6 +200,11 @@ fit <- fit.clusters(night, 10)
 ggmap(seattle) +
   geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
 plot.cluster.sizes(fit)
+
+fit <- fit.clusters(early.morning, 10)
+ggmap(seattle) +
+  geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
+plot.cluster.sizes(fit)
 ```
 
 The fact that Crisis Complaints outnumber every other description and its not very specific is skewing our analysis. Let's remove those crimes and try again.

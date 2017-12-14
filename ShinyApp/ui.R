@@ -42,11 +42,11 @@ ui <- navbarPage("Walk Safely at UW!",
                  tags$li('Police responsiveness'),
                  tags$li('Proximity to public services')
                ),
-               "To address the first factor, type of crime, we decided only to look at crimes likely to directly put a pedestrian in harms
+               "To address the first factor, type of crime, we decided only to look at crimes likely to directly put a pedestrian in harm's
                way. Such crimes include muggings, assaults, hazards, and robberies. We faced unique challenges in handling the other factors
-               , the details of which are outline in the other sections of this site."
+               , the details of which are outlined in the other sections of this app."
              ),
-             tags$h2('How to use this site'),
+             tags$h2('How to use this app'),
              tags$p(
                "Our results are seperated into three tabs, which you can see at the top of this page. We encourage you to click on any one
                of them to learn more about how we examine the factors of risk we identified."
@@ -103,8 +103,8 @@ ui <- navbarPage("Walk Safely at UW!",
         p("Clustering density not factoring in Crisis Complaints"),
         plotOutput("Time.seven.d"),
         p(
-          "In conclusion, there is varience in reported crime throughout the day. The highest time of activity seems to be around
-          mid day, which might go contrary to belief. It's still yet to be determined what effect less people around during night
+          "In conclusion, there is variance in reported crime throughout the day. The highest time of activity seems to be around
+          mid day, which might be contrary to popular belief. It's still yet to be determined what effect less people around during night
           time has on rate of crime reporting. Intuition should suggest that if there are less people awake to witness crimes, there's
           a good chance less crime will be reported. This could explain why there are more reported crimes during the day, but it
           would be interesting to study this in further detail at a later date. For now, we find it advisable to continue being
@@ -114,7 +114,7 @@ ui <- navbarPage("Walk Safely at UW!",
           "From our clustering analysis we can see that the area between 42nd and 50th, Brooklyn to 15th is the hottest spot for 
           reported pedestrian crimes. While there are outliers that may change throughout the day, most crimes tend to be reported 
           in this area. Furthermore, it appears that during the afternoon and early morning, most crimes take place on 45th Avenue
-          specifically. This could signal that this stretch of road is advisable to be extra catious of during these times.
+          specifically. It is advisable to be extra careful on this part of campus during these hours.
           "
         ),
         width = 8
