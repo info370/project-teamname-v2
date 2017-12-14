@@ -3,7 +3,6 @@ library("shiny")
 # input = values defined by control widgets (Names in ui)
 # output = assigned new values from Server
 source('./Scripts/timeOfDay.R') # Imports charts for time of day section
-source('./Scripts/clearanceTime.R')
 
 server <- function(input, output) {
   output$Time.one <- renderPlot( # Plot output ("Name") is output$"Name"
