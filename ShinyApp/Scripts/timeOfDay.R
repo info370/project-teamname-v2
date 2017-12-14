@@ -5,7 +5,7 @@ library(stringr)
 library(rgdal)
 library(caret)
 library(lubridate)
-library(maptools)
+# library(maptools)
 if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
 library(ggmap)
 
@@ -174,6 +174,21 @@ TimeChart.six.b <- function(time.of.day) {
   return(current.plot)
 }
 
+#take out general crisis complaint - general
+data.filtered <- filter(data, Event.Clearance.Description != 'CRISIS COMPLAINT - GENERAL')
+
+morning.filtered <- filter(data.filtered, 6 <= at_scene_time_hr, at_scene_time_hr < 10 )
+mid.day.filtered <-  filter(data.filtered, 10 <= at_scene_time_hr, at_scene_time_hr < 14 )
+afternoon.filtered <-  filter(data.filtered, 14 <= at_scene_time_hr, at_scene_time_hr < 18 )
+evening.filtered <-  filter(data.filtered, 18 <= at_scene_time_hr, at_scene_time_hr < 22 )
+night.filtered <-  filter(data.filtered, 22 <= at_scene_time_hr | at_scene_time_hr < 2 )
+early.morning.filtered <-  filter(data.filtered, 2 <= at_scene_time_hr, at_scene_time_hr < 6 )
+
+lengths.two <- c(nrow(morning.filtered), nrow(mid.day.filtered), nrow(afternoon.filtered), nrow(evening.filtered), nrow(night.filtered), nrow(early.morning.filtered))
+names.two <- c('Morning\n6:00 - 9:59', 'Mid-day\n10:00 - 1:59', 'Afternoon\n2:00 - 5:59', 'Evening\n6:00 - 9:59', 'Night\n10:00 - 1:59', 'Early Morning\n2:00 - 5:59')
+by.tod.two <- data.frame('TOD' = names, 'Count.Crimes' = lengths)
+by.tod.two$TOD = factor(by.tod$TOD, levels = by.tod$TOD)
+
 TimeChart.seven.a <- function(time.of.day) {
   if(time.of.day == "Morning") {
     current.plot <- ggmap(seattle) +
@@ -260,44 +275,4 @@ TimeChart.seven.d <- function(time.of.day) {
   current.plot <- plot.cluster.sizes(fit)
   return(current.plot)
 }
- #take out general crisis complaint - general
- data.filtered <- filter(data, Event.Clearance.Description != 'CRISIS COMPLAINT - GENERAL')
 
- morning.filtered <- filter(data.filtered, 6 <= at_scene_time_hr, at_scene_time_hr < 10 )
- mid.day.filtered <-  filter(data.filtered, 10 <= at_scene_time_hr, at_scene_time_hr < 14 )
- afternoon.filtered <-  filter(data.filtered, 14 <= at_scene_time_hr, at_scene_time_hr < 18 )
- evening.filtered <-  filter(data.filtered, 18 <= at_scene_time_hr, at_scene_time_hr < 22 )
- night.filtered <-  filter(data.filtered, 22 <= at_scene_time_hr | at_scene_time_hr < 2 )
- early.morning.filtered <-  filter(data.filtered, 2 <= at_scene_time_hr, at_scene_time_hr < 6 )
-
- lengths.two <- c(nrow(morning.filtered), nrow(mid.day.filtered), nrow(afternoon.filtered), nrow(evening.filtered), nrow(night.filtered), nrow(early.morning.filtered))
- names.two <- c('Morning\n6:00 - 9:59', 'Mid-day\n10:00 - 1:59', 'Afternoon\n2:00 - 5:59', 'Evening\n6:00 - 9:59', 'Night\n10:00 - 1:59', 'Early Morning\n2:00 - 5:59')
- by.tod.two <- data.frame('TOD' = names, 'Count.Crimes' = lengths)
- by.tod.two$TOD = factor(by.tod$TOD, levels = by.tod$TOD)
-
-#  # find the mode of numeric/character data
-#  Mode <- function(x) {
-#    ux <- unique(x)
-#    tab <- tabulate(match(x, ux)); ux[tab == max(tab)]
-#  }
-# 
-#  tod.mean <- mean(data.filtered$at_scene_time_hr)
-#  tod.med <- median(data.filtered$at_scene_time_hr)
-#  Mode(data.filtered$at_scene_time_hr)
-# 
-# #What is the most common crime committed at each period?
-#  Mode(morning.filtered$Event.Clearance.Description)
-#  Mode(mid.day.filtered$Event.Clearance.Description)
-#  Mode(afternoon.filtered$Event.Clearance.Description)
-#  Mode(evening.filtered$Event.Clearance.Description)
-#  Mode(night.filtered$Event.Clearance.Description)
-#  Mode(early.morning.filtered$Event.Clearance.Description)
- 
- 
- 
- 
- 
- 
- 
- 
- 

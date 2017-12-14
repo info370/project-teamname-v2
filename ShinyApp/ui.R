@@ -8,10 +8,10 @@ library(stringr)
 library(rgdal)
 library(caret)
 library(lubridate)
-library(maptools)
+# library(maptools)
 if (!require(ggmap)) { install.packages('ggmap'); require(ggmap) }
 library(ggmap)
-
+install.packages
 here_long <-  -122.3095
 here_lat <- 47.6560
 
