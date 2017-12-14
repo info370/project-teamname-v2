@@ -42,12 +42,6 @@ server <- function(input, output) {
   output$Time.seven.d <- renderPlot(
     return(TimeChart.seven.d(input$time.of.day))
   )
-  output$Clearance.one <- renderPlot(
-    return(clearanceChart.one)
-  )
-  output$Clearance.two <- renderPlot(
-    return(clearanceChart.two(input$time.of.day))
-  )
 }
 
 shinyServer(server)

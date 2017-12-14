@@ -321,10 +321,6 @@ mean(data$time_until_event_clear)
 By taking a look at the scatterplot and the overall mean, it can be inferred that a few crimes that take more than 20,000 minutes to clear (almost 2 weeks) are skewing the data. Let's take a look at this data and see what kind of crimes are associated with such long clearance times, and, where these crimes are located.
 
 ```{r}
-# Resetting the data for the clearance times
-data <- read.csv('../maps-api-test/2016-2017-Clean.csv', header = TRUE)
-data <- filter(data, !str_detect(Event.Clearance.Description, "HARBOR - DEBRIS, NAVIGATIONAL HAZARDS"))
-data <- filter(data, Event.Clearance.Description != 'CRISIS COMPLAINT - GENERAL') # filtering out data that is under the Crisis Complaint Description
 data.over.twenty <- filter(data, time_until_event_clear > 20000) # filtering out data that takes 20000 minutes or under to clear
 data <- data.over.twenty
 
