@@ -54,7 +54,7 @@ ui <- navbarPage("Walk Safely at UW!",
                             )
                             ),
                  tabPanel("Time of Day",
-                          titlePanel("Results of testing by Time of Day"),
+                          titlePanel("Results of Testing by Time of Day"),
                           sidebarLayout(
                             sidebarPanel(style = "position:fixed;width:inherit;",
                                          selectInput("time.of.day", "Select Time",
@@ -122,12 +122,13 @@ ui <- navbarPage("Walk Safely at UW!",
                               )
                               ),
                  tabPanel("Clearance Time",
+                            titlePanel("Results of Testing by Clearance Time"),
                             mainPanel(
                               style = "padding-left: 2cm;",
                               p(
                                 "Now, we will explore the clearance time for these crimes. Clearance time is calculated to be the 
                                 difference between the time that that police arrive at the scene and the time at which the crime has 
-                                officially been cleared by the Seattle Police Department. Shown below, we have a map of University District
+                                officially been cleared by the Seattle Police Department. Shown below, we have a map of the University District
                                 and the various data points representing crime that has occurred in the past year. The colors represent the
                                 length of the clearance time.
                                 "
@@ -170,7 +171,7 @@ ui <- navbarPage("Walk Safely at UW!",
                  ),
                  tabPanel("Proximity",
                           style = "padding-left: 2cm",
-                          h2("Results of testing by proximity to public services"),
+                          h2("Results of Testing by Proximity to Public Services"),
                           mainPanel(
                             p(
                               "Another one of the factors we investigated was whether or not proximity to public services, such as transport services like bus stops, had an impact on the frequency of crime in an area."

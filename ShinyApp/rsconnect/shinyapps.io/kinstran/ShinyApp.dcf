@@ -1,0 +1,12 @@
+name: ShinyApp
+title: ShinyApp
+username:
+account: kinstran
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 248614
+bundleId: 1134188
+url: https://kinstran.shinyapps.io/ShinyApp/
+when: 1513236612.3478
+asMultiple: FALSE
+asStatic: FALSE
