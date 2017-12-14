@@ -127,9 +127,38 @@ ui <- navbarPage("Walk Safely at UW!",
    mainPanel("Content WOW")
   ),
   tabPanel("Proximity",
-    h1("Page 4"),
-    titlePanel("Title"),
-    mainPanel("Content WOW")
+    style = "padding-left: 2cm",
+    h2("Results of testing by proximity to public services"),
+    mainPanel(
+      p(
+        "Another one of the factors we investigated was whether or not proximity to public services, such as transport services like bus stops, had an impact on the frequency of crime in an area."
+      ),
+      p("
+        To perform this analysis, we cross-referenced data between our filtered down crime dataset and Google Transit data regarding bus stops in Seattle. To begin with, a map showing all bus stops in our considered region is depicted below."
+        ),
+      img(src='Bus_Stops.png'),
+      p("
+        As one would expect, the points on the map are aligned with the city's streets."
+        ),
+      p("
+        Next, we defined 'dangerous bus stops' to be any stop with at least one criminal incident reported within 20 meters. Of the 297 stops found within 2600 meters of Red Square, 49 fell under this category. A histogram depicting frequency by proximity to stops may be seen here:
+        "),
+      img(src='Bus_Stops_Histogram.png'),
+      p("
+        With this, we can see that the majority of stops are likely to be safe - however, there are several outliers that have significantly higher rates of crime around them than the rest of the data set. While a mapping of all 49 stops featuring criminal incidents within 20 meters may look like this:
+        "),
+      img(src='Dangerous_Bus_Stops.png'),
+      p("
+        A mapping of the stops with the highest frequency of incident reports, including at least one per month in the dataset we have, will look like this:
+        "),
+      img(src='Most_Dangerous_Stops.png'),
+      p("
+        And these results are in line with the results of the clustering anaylsis we performed, which suggested that the area up and down University Way right next to U.W. campus is the area within our region of interest that is most dangerous to pedestrians.
+        "),
+      p("
+        While this analysis is not necessarily indicative of a relationship between bus stop location and crime ( and moreso just highlights the bus stops that are in the areas with the greatest prevalence of criminal activity ), it may further serve to inform students of where they should, or rather should not, wait to catch the bus if they want to stay safe.
+        ")
+    )
   )
 )
 
