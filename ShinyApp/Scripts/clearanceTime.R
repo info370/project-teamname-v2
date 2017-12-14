@@ -17,8 +17,7 @@ seattle = get_map(location = c(here_long, here_lat), zoom = 13, maptype = 'roadm
 data <- read.csv('../maps-api-test/2016-2017-Clean.csv', header = TRUE)
 data <- filter(data, !str_detect(Event.Clearance.Description, "HARBOR - DEBRIS, NAVIGATIONAL HAZARDS"))
 data <- filter(data, Event.Clearance.Description != 'CRISIS COMPLAINT - GENERAL') # filtering out data that is under the Crisis Complaint Description
-data.over.twenty <- filter(data, time_until_event_clear > 20000) # filtering out data that takes 20000 minutes or under to clear
-data <- data.over.twenty
+data <- filter(data, time_until_event_clear > 20000) # filtering out data that takes 20000 minutes or under to clear
 
 clearance_codes <- factor(data$Event.Clearance.Code)
 # plotting the scatter plot with distance from Red Square and clearance times

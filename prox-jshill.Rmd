@@ -19,7 +19,7 @@ spd.911 <- read.csv(path.to.csv, TRUE)
 here_long <-  -122.3095
 here_lat <- 47.6560
 
-stops <- read.csv('~/Downloads/stops.csv', TRUE)
+stops <- read.csv('maps-api-test/stops.csv', TRUE)
 # View(stops)
 ```
 

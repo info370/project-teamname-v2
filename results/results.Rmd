@@ -200,6 +200,11 @@ fit <- fit.clusters(night, 10)
 ggmap(seattle) +
   geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
 plot.cluster.sizes(fit)
+
+fit <- fit.clusters(early.morning, 10)
+ggmap(seattle) +
+  geom_point(data = as.data.frame(fit$centers), aes(x = Longitude, y = Latitude), alpha = 0.5)
+plot.cluster.sizes(fit)
 ```
 
 The fact that Crisis Complaints outnumber every other description and its not very specific is skewing our analysis. Let's remove those crimes and try again.
@@ -296,12 +301,19 @@ plot.cluster.sizes(fit)
 Now, we will explore the clearance time for these crimes. Clearance time is calculated to be the difference between the time that that police arrive at the scene and the time at which the crime has officially been cleared by the Seattle Police Department.
 
 ```{r}
-
+data <- read.csv('../maps-api-test/2016-2017-Clean.csv', header = TRUE)
+data <- filter(data, !str_detect(Event.Clearance.Description, "HARBOR - DEBRIS, NAVIGATIONAL HAZARDS"))
+data <- filter(data, Event.Clearance.Description != 'CRISIS COMPLAINT - GENERAL') # filtering out data that is under the Crisis Complaint
 ggplot(data, 
        aes(x = data$dist, y = data$time_until_event_clear)) +
        geom_point(stat = 'identity') +
       xlab('Distance from Red Square (meters)') +
-      ylab('Clearance Time (minutes)')
+      ylab('Clearance Time (minutes)') + 
+      labs(title = "Clearance Time of Crimes From Oct. 2016 - Nov. 2017")
+
+ggmap(seattle) +
+  geom_point(data = data, aes(x = Longitude, y = Latitude, colour = time_until_event_clear), alpha = 0.5) + 
+  scale_colour_gradient(low = "blue", high = "red")
 
 mean(data$time_until_event_clear)
 ```
@@ -329,10 +341,13 @@ clearance.plot
 By taking  a look at the new scatter plot with the filtered data, we can see that crimes with clearance code 350 (crimes under the Event Clearance Group, "Hazards") seem to be taking the longest time. We can confirm this by running a mode and see the mean clearance time for "Hazards".
 
 ```{r}
-Mode(data$Event.Clearance.Code) # 350
 hazards <- filter(data, Event.Clearance.Code == 350)
 mean(hazards$time_until_event_clear) # Mean time is 33575.17 minutes, or about 23 days. We will filter these data points out because of the skew.
 data <- filter(data, Event.Clearance.Code != 350) # filtering out hazards
+ggmap(seattle) +
+  geom_point(data = data, aes(x = Longitude, y = Latitude, colour = time_until_event_clear), alpha = 0.5) + 
+  scale_colour_gradient(low = "blue", high = "red")
+
 ```
 
 Now that we have properly cleaned this data, we can begin to explore clustering.
