@@ -292,3 +292,12 @@ TimeChart.seven.d <- function(time.of.day) {
 #  Mode(evening.filtered$Event.Clearance.Description)
 #  Mode(night.filtered$Event.Clearance.Description)
 #  Mode(early.morning.filtered$Event.Clearance.Description)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
