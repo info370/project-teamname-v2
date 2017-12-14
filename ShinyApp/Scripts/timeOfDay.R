@@ -13,7 +13,7 @@ here_long <-  -122.3095
 here_lat <- 47.6560
 seattle = get_map(location = c(here_long, here_lat), zoom = 13, maptype = 'roadmap')
 
-data <- read.csv('../maps-api-test/2016-2017-Clean.csv', header = TRUE)
+data <- read.csv('./Scripts/2016-2017-Clean.csv', header = TRUE)
 data <- filter(data, !str_detect(Event.Clearance.Description, "HARBOR - DEBRIS, NAVIGATIONAL HAZARDS"))
 TimeChart.one <- ggmap(seattle) +
   geom_point(data = data, aes(x = Longitude, y = Latitude), colour = "red", alpha = 0.75)
